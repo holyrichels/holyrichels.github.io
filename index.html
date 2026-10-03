@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>holyrichels</title>
+<meta name="description" content="Личная страница">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ========== НАСТРОЙКИ ========== */
+  :root {
+    --bg-image: url("bg.jpg");
+    --text: #e9e4f2;
+    --muted: #b3a9c6;
+    --card: rgba(30, 24, 40, .55);
+  }
+  /* ============================== */
+
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      var(--bg-image) center / cover no-repeat fixed,
+      linear-gradient(160deg, #8b6f86 0%, #6b5a86 38%, #3c4a85 75%, #2a2f5e 100%) fixed;
+  }
+  body::before { /* затемнение поверх фона */
+    content: ""; position: fixed; inset: 0; background: rgba(15, 10, 25, .45); z-index: -1;
+  }
+
+  .card {
+    width: min(100%, 440px);
+    padding: 40px 28px 32px;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    animation: appear .9s ease both;
+  }
+  @keyframes appear { from { opacity: 0; transform: scale(.97); } }
+
+  .avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    object-fit: cover; display: block; margin: 0 auto 16px;
+    background: linear-gradient(135deg, #a58bb8, #5a6bb5);
+    border: 2px solid rgba(255, 255, 255, .15);
+  }
+  h1 { font-family: "Unbounded", "Manrope", sans-serif; font-size: 1.7rem; font-weight: 700; letter-spacing: .01em; }
+  .bio { margin-top: 6px; font-weight: 600; color: var(--muted); }
+  .loc {
+    margin-top: 14px; display: inline-flex; align-items: center; gap: 6px;
+    font-size: .85rem; color: var(--muted);
+  }
+
+  .discord {
+    margin: 24px auto 0; padding: 12px 16px; max-width: 340px;
+    display: flex; align-items: center; gap: 14px; text-align: left;
+    background: rgba(255, 255, 255, .06); border-radius: 16px;
+  }
+  .ava { position: relative; flex: none; width: 52px; height: 52px; }
+  .ava img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #5a6bb5; }
+  .dot {
+    position: absolute; right: -2px; bottom: -2px; width: 16px; height: 16px;
+    border-radius: 50%; background: #747f8d; border: 3px solid #2a2433;
+  }
+  .dot.online { background: #3ba55d; } .dot.idle { background: #faa61a; }
+  .dot.dnd { background: #ed4245; } .dot.offline { background: #747f8d; }
+  .info { min-width: 0; }
+  .info b { display: block; font-size: .95rem; }
+  .info span { display: block; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .links { margin-top: 26px; display: flex; justify-content: center; gap: 18px; }
+  .links a { color: var(--muted); transition: color .2s, transform .2s; display: grid; }
+  .links a:hover, .links a:focus-visible { color: #fff; transform: translateY(-2px); outline: none; }
+  .links svg { width: 30px; height: 30px; fill: currentColor; }
+
+
+  /* видео на фоне */
+  #bgv { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+
+  /* экран «нажми, чтобы войти» (нужен, т.к. браузеры не дают включить звук без клика) */
+  #enter {
+    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+    background: rgba(15, 10, 25, .7); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    color: var(--text); font: 600 1.1rem "Manrope", sans-serif; border: 0; cursor: pointer;
+    transition: opacity .6s;
+  }
+  #enter.gone { opacity: 0; pointer-events: none; }
+
+  #sound {
+    position: fixed; right: 20px; bottom: 20px; z-index: 5; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.12); cursor: pointer;
+    background: var(--card); color: var(--text); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    display: grid; place-items: center;
+  }
+  #sound svg { width: 20px; height: 20px; fill: currentColor; }
+  #sound[hidden] { display: none; }
+
+  a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) { .card { animation: none; } .links a { transition: none; } }
+</style>
+</head>
+<body>
+  <video id="bgv" src="bg.mp4" poster="bg.jpg" autoplay muted loop playsinline preload="auto"></video>
+  <audio id="music" src="music.mp3" loop preload="auto"></audio>
+  <button id="enter" type="button">Нажми, чтобы войти</button>
+  <button id="sound" type="button" aria-label="Включить или выключить звук" hidden>
+    <svg viewBox="0 0 24 24"><path id="ico" d="M3 9v6h4l5 5V4L7 9H3zm13.500 3A4.500 4.500 0 0 0 14 8v8a4.500 4.500 0 0 0 2.500-4zM14 3.200v2.100a7 7 0 0 1 0 13.400v2.100a9 9 0 0 0 0-17.600z"/></svg>
+  </button>
+
+  <main class="card">
+    <img class="avatar" src="avatar.jpg" alt="" onerror="this.removeAttribute('src')">
+
+    <h1>holyrichels</h1>
+    <p class="bio">В тишине слышен самый громкий голос</p>
+    <p class="loc">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.500z"/></svg>
+      Moscow, Russia
+    </p>
+
+    <div class="discord" id="discord">
+      <div class="ava"><img id="d-ava" alt=""><span class="dot offline" id="d-dot"></span></div>
+      <div class="info"><b id="d-name">Discord</b><span id="d-text">Загружаю профиль…</span></div>
+    </div>
+
+    <nav class="links" aria-label="Мои ссылки">
+      <a href="https://github.com/holyrichels" aria-label="GitHub" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      <a href="https://steamcommunity.com/id/holyrichels" aria-label="Steam" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><g fill="none" stroke="#2a2433" stroke-linecap="round"><circle cx="15.200" cy="9.300" r="3.700" stroke-width="2.200"/><path d="M8.600 15.600l4.200-4" stroke-width="2.400"/></g><circle cx="8.200" cy="15.800" r="2.600" fill="#2a2433"/><circle cx="8.200" cy="15.800" r="1" fill="currentColor"/></svg>
+      </a>
+    </nav>
+  </main>
+  <script>
+    const DISCORD_ID = "652156100874993665";
+
+    const $ = id => document.getElementById(id);
+    const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
+
+    async function loadDiscord() {
+      try {
+        const r = await fetch("https://api.lanyard.rest/v1/users/" + DISCORD_ID);
+        const { success, data } = await r.json();
+        if (!success) throw new Error("not found");
+        const u = data.discord_user;
+        $("d-name").textContent = u.global_name || u.username;
+        if (u.avatar) $("d-ava").src = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`;
+        $("d-dot").className = "dot " + data.discord_status;
+
+        const custom = data.activities.find(a => a.type === 4);
+        const game = data.activities.find(a => a.type !== 4);
+        let text = labels[data.discord_status];
+        if (data.listening_to_spotify && data.spotify) text = `Слушает: ${data.spotify.artist} — ${data.spotify.song}`;
+        else if (game) text = `Играет в ${game.name}`;
+        else if (custom && custom.state) text = custom.state;
+        $("d-text").textContent = text;
+      } catch (e) {
+        $("d-text").textContent = "Профиль не подключён";
+      }
+    }
+    loadDiscord();
+    setInterval(loadDiscord, 30000);
+  </script>
+  <script>
+    // ===== видео и музыка =====
+    const music = document.getElementById("music");
+    const bgv = document.getElementById("bgv");
+    const enter = document.getElementById("enter");
+    const sound = document.getElementById("sound");
+    const ico = document.getElementById("ico");
+    const ON = "M3 9v6h4l5 5V4L7 9H3zm13.500 3A4.500 4.500 0 0 0 14 8v8a4.500 4.500 0 0 0 2.500-4zM14 3.200v2.100a7 7 0 0 1 0 13.400v2.100a9 9 0 0 0 0-17.600z";
+    const OFF = "M3 9v6h4l5 5V4L7 9H3zm13.600 3 2.400-2.400-1.400-1.400L15.200 10.600 12.800 8.200 11.400 9.600 13.800 12l-2.400 2.400 1.400 1.400 2.400-2.400 2.400 2.400 1.400-1.400L16.600 12z";
+    music.volume = 0.04;
+
+    music.addEventListener("error", () => { sound.hidden = true; });
+
+    enter.addEventListener("click", async () => {
+      enter.classList.add("gone");
+      bgv.play().catch(() => {});
+      try { await music.play(); sound.hidden = false; } catch (e) {}
+    });
+
+    sound.addEventListener("click", () => {
+      if (music.paused) { music.play(); ico.setAttribute("d", ON); }
+      else { music.pause(); ico.setAttribute("d", OFF); }
+    });
+  </script>
+</body>
+</html>
