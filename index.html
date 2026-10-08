@@ -102,8 +102,12 @@
   .player input[type=range] { flex: 1; min-width: 0; accent-color: #b8a2d6; cursor: pointer; }
   .player-wrap { margin-top: 22px; }
 
-  .views { margin-top: 18px; display: flex; justify-content: center; }
-  .views img { height: 20px; }
+  .views {
+    margin-top: 18px; display: flex; align-items: center; justify-content: center;
+    gap: 8px; color: var(--muted); font-size: .9rem; font-weight: 600;
+  }
+  .views svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #views-n { color: var(--text); font-variant-numeric: tabular-nums; }
 
   /* экран входа */
   #enter {
@@ -164,9 +168,11 @@
       </div>
     </div>
 
-    <div class="views">
-      <img alt="просмотры" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fholyrichels.github.io&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=views&edge_flat=false">
+    <div class="views" title="Просмотры сайта">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="views-n">—</span>
     </div>
+    <img src="https://hits.sh/holyrichels.github.io.svg?style=flat&label=&color=00000000" alt="" width="1" height="1" style="position:absolute;opacity:0">
   </main>
 
   <script>
@@ -216,7 +222,7 @@
     setInterval(loadDiscord, 30000);
 
     // ===== видео, плеер и громкость =====
-    const TRACKS = ["music.mp3", "music1.mp3", "music2.mp3", "music3.mp3", "music4.mp3"]; // добавляй свои файлы сюда
+    const TRACKS = ["music/music.mp3", "music/music2.mp3", "music/music3.mp3"]; // добавляй свои файлы сюда
     const video = $("bgv"), enter = $("enter"), player = $("player");
     const audio = new Audio();
     audio.volume = 0.4;
@@ -256,6 +262,20 @@
       play();
       player.hidden = false;
     });
+
+    // ===== счётчик просмотров =====
+    async function loadViews() {
+      try {
+        const r = await fetch("https://hits.sh/holyrichels.github.io.json");
+        const d = await r.json();
+        const n = d.total ?? d.hits ?? d.count;
+        if (n == null) throw new Error("no count");
+        $("views-n").textContent = Number(n).toLocaleString("ru-RU");
+      } catch (e) {
+        $("views-n").textContent = "—";
+      }
+    }
+    loadViews();
   </script>
 </body>
 </html>
