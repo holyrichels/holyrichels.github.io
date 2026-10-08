@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  /* ====== НАСТРОЙКИ: меняй тут ====== */
+  /* =========== НАСТРОЙКИ =========== */
   :root {
     --bg-image: url("bg.jpg");
     --text: #e9e4f2;
@@ -192,8 +192,8 @@
     }
     typewrite($("bio"));
 
-    // ===== Discord (Lanyard) =====
-    const DISCORD_ID = "652156100874993665"; // нужно быть на сервере https://discord.gg/lanyard
+    // ===== Discord =====
+    const DISCORD_ID = "652156100874993665";
     const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
 
     async function loadDiscord() {
@@ -243,7 +243,6 @@
     audio.addEventListener("pause", () => setIcon(false));
     audio.addEventListener("ended", next);
     audio.addEventListener("error", () => {
-      // файла нет: пробуем следующий, если ни один не нашёлся, прячем плеер
       if (++failed >= TRACKS.length) { player.hidden = true; return; }
       next();
     });
