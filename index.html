@@ -10,14 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  /* ========== НАСТРОЙКИ ========== */
+  /* ====== НАСТРОЙКИ: меняй тут ====== */
   :root {
     --bg-image: url("bg.jpg");
     --text: #e9e4f2;
     --muted: #b3a9c6;
     --card: rgba(30, 24, 40, .55);
   }
-  /* ============================== */
+  /* ================================== */
 
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
@@ -31,13 +31,14 @@
       var(--bg-image) center / cover no-repeat fixed,
       linear-gradient(160deg, #8b6f86 0%, #6b5a86 38%, #3c4a85 75%, #2a2f5e 100%) fixed;
   }
-  body::before { /* затемнение поверх фона */
+  body::before {
     content: ""; position: fixed; inset: 0; background: rgba(15, 10, 25, .45); z-index: -1;
   }
+  #bgv { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 
   .card {
     width: min(100%, 440px);
-    padding: 40px 28px 32px;
+    padding: 40px 28px 28px;
     text-align: center;
     background: var(--card);
     border: 1px solid rgba(255, 255, 255, .08);
@@ -55,7 +56,9 @@
     border: 2px solid rgba(255, 255, 255, .15);
   }
   h1 { font-family: "Unbounded", "Manrope", sans-serif; font-size: 1.7rem; font-weight: 700; letter-spacing: .01em; }
-  .bio { margin-top: 6px; font-weight: 600; color: var(--muted); }
+  .bio { margin-top: 6px; font-weight: 600; color: var(--muted); min-height: 1.5em; }
+  .bio.typing::after { content: "|"; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
   .loc {
     margin-top: 14px; display: inline-flex; align-items: center; gap: 6px;
     font-size: .85rem; color: var(--muted);
@@ -83,11 +86,26 @@
   .links a:hover, .links a:focus-visible { color: #fff; transform: translateY(-2px); outline: none; }
   .links svg { width: 30px; height: 30px; fill: currentColor; }
 
+  /* плеер */
+  .player {
+    margin: 22px auto 0; max-width: 340px; display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: rgba(255, 255, 255, .06); border-radius: 16px;
+  }
+  .player[hidden] { display: none; }
+  .player button {
+    flex: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .12); background: var(--card); color: var(--text);
+    display: grid; place-items: center; transition: transform .15s;
+  }
+  .player button:hover { transform: scale(1.08); }
+  .player svg { width: 16px; height: 16px; fill: currentColor; }
+  .player input[type=range] { flex: 1; min-width: 0; accent-color: #b8a2d6; cursor: pointer; }
+  .player-wrap { margin-top: 22px; }
 
-  /* видео на фоне */
-  #bgv { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+  .views { margin-top: 18px; display: flex; justify-content: center; }
+  .views img { height: 20px; }
 
-  /* экран «нажми, чтобы войти» (нужен, т.к. браузеры не дают включить звук без клика) */
+  /* экран входа */
   #enter {
     position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
     background: rgba(15, 10, 25, .7); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -96,34 +114,24 @@
   }
   #enter.gone { opacity: 0; pointer-events: none; }
 
-  #sound {
-    position: fixed; right: 20px; bottom: 20px; z-index: 5; width: 44px; height: 44px;
-    border-radius: 50%; border: 1px solid rgba(255,255,255,.12); cursor: pointer;
-    background: var(--card); color: var(--text); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    display: grid; place-items: center;
+  a:focus-visible, button:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; } .links a, .player button { transition: none; }
+    .bio.typing::after { animation: none; }
   }
-  #sound svg { width: 20px; height: 20px; fill: currentColor; }
-  #sound[hidden] { display: none; }
-
-  a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 6px; }
-  @media (prefers-reduced-motion: reduce) { .card { animation: none; } .links a { transition: none; } }
 </style>
 </head>
 <body>
   <video id="bgv" src="bg.mp4" poster="bg.jpg" autoplay muted loop playsinline preload="auto"></video>
-  <audio id="music" src="music.mp3" loop preload="auto"></audio>
   <button id="enter" type="button">Нажми, чтобы войти</button>
-  <button id="sound" type="button" aria-label="Включить или выключить звук" hidden>
-    <svg viewBox="0 0 24 24"><path id="ico" d="M3 9v6h4l5 5V4L7 9H3zm13.500 3A4.500 4.500 0 0 0 14 8v8a4.500 4.500 0 0 0 2.500-4zM14 3.200v2.100a7 7 0 0 1 0 13.400v2.100a9 9 0 0 0 0-17.600z"/></svg>
-  </button>
 
   <main class="card">
     <img class="avatar" src="avatar.jpg" alt="" onerror="this.removeAttribute('src')">
 
     <h1>holyrichels</h1>
-    <p class="bio">В тишине слышен самый громкий голос</p>
+    <p class="bio" id="bio" data-text="В тишине слышен самый громкий голос"></p>
     <p class="loc">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.500z"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
       Moscow, Russia
     </p>
 
@@ -137,14 +145,50 @@
         <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
       <a href="https://steamcommunity.com/id/holyrichels" aria-label="Steam" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><g fill="none" stroke="#2a2433" stroke-linecap="round"><circle cx="15.200" cy="9.300" r="3.700" stroke-width="2.200"/><path d="M8.600 15.600l4.200-4" stroke-width="2.400"/></g><circle cx="8.200" cy="15.800" r="2.600" fill="#2a2433"/><circle cx="8.200" cy="15.800" r="1" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><g fill="none" stroke="#2a2433" stroke-linecap="round"><circle cx="15.2" cy="9.3" r="3.7" stroke-width="2.2"/><path d="M8.6 15.6l4.2-4" stroke-width="2.4"/></g><circle cx="8.2" cy="15.8" r="2.6" fill="#2a2433"/><circle cx="8.2" cy="15.8" r="1" fill="currentColor"/></svg>
       </a>
     </nav>
-  </main>
-  <script>
-    const DISCORD_ID = "652156100874993665";
 
+    <div class="player-wrap">
+      <div class="player" id="player" hidden>
+        <button id="prev" type="button" aria-label="Предыдущий трек">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12 18 6v12z"/></svg>
+        </button>
+        <button id="toggle" type="button" aria-label="Пауза или воспроизведение">
+          <svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button id="next" type="button" aria-label="Следующий трек">
+          <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+        </button>
+        <input id="vol" type="range" min="0" max="100" value="40" aria-label="Громкость">
+      </div>
+    </div>
+
+    <div class="views">
+      <img alt="просмотры" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fholyrichels.github.io&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=views&edge_flat=false">
+    </div>
+  </main>
+
+  <script>
     const $ = id => document.getElementById(id);
+
+    // ===== печатная машинка =====
+    function typewrite(el) {
+      const text = el.dataset.text;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = text; return; }
+      el.textContent = "";
+      el.classList.add("typing");
+      let i = 0;
+      (function step() {
+        el.textContent = text.slice(0, ++i);
+        if (i < text.length) setTimeout(step, 55);
+        else setTimeout(() => el.classList.remove("typing"), 1200);
+      })();
+    }
+    typewrite($("bio"));
+
+    // ===== Discord (Lanyard) =====
+    const DISCORD_ID = "652156100874993665"; // нужно быть на сервере https://discord.gg/lanyard
     const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
 
     async function loadDiscord() {
@@ -170,29 +214,47 @@
     }
     loadDiscord();
     setInterval(loadDiscord, 30000);
-  </script>
-  <script>
-    // ===== видео и музыка =====
-    const music = document.getElementById("music");
-    const bgv = document.getElementById("bgv");
-    const enter = document.getElementById("enter");
-    const sound = document.getElementById("sound");
-    const ico = document.getElementById("ico");
-    const ON = "M3 9v6h4l5 5V4L7 9H3zm13.500 3A4.500 4.500 0 0 0 14 8v8a4.500 4.500 0 0 0 2.500-4zM14 3.200v2.100a7 7 0 0 1 0 13.400v2.100a9 9 0 0 0 0-17.600z";
-    const OFF = "M3 9v6h4l5 5V4L7 9H3zm13.600 3 2.400-2.400-1.400-1.400L15.200 10.600 12.800 8.200 11.400 9.600 13.800 12l-2.400 2.400 1.400 1.400 2.400-2.400 2.400 2.400 1.400-1.400L16.600 12z";
-    music.volume = 0.04;
 
-    music.addEventListener("error", () => { sound.hidden = true; });
+    // ===== видео, плеер и громкость =====
+    const TRACKS = ["music.mp3", "music1.mp3", "music2.mp3", "music3.mp3", "music4.mp3"]; // добавляй свои файлы сюда
+    const video = $("bgv"), enter = $("enter"), player = $("player");
+    const audio = new Audio();
+    audio.volume = 0.4;
+    let idx = 0, started = false, failed = 0;
 
-    enter.addEventListener("click", async () => {
-      enter.classList.add("gone");
-      bgv.play().catch(() => {});
-      try { await music.play(); sound.hidden = false; } catch (e) {}
+    const ICON_PLAY = "M8 5v14l11-7z";
+    const ICON_PAUSE = "M6 5h4v14H6zM14 5h4v14h-4z";
+    const setIcon = playing => $("ico").firstElementChild.setAttribute("d", playing ? ICON_PAUSE : ICON_PLAY);
+
+    function load(i) {
+      idx = (i + TRACKS.length) % TRACKS.length;
+      audio.src = TRACKS[idx];
+    }
+    function play() { audio.play().catch(() => {}); }
+    function next() { load(idx + 1); if (started) play(); }
+    function prev() { load(idx - 1); if (started) play(); }
+
+    audio.addEventListener("playing", () => { failed = 0; setIcon(true); });
+    audio.addEventListener("pause", () => setIcon(false));
+    audio.addEventListener("ended", next);
+    audio.addEventListener("error", () => {
+      // файла нет: пробуем следующий, если ни один не нашёлся, прячем плеер
+      if (++failed >= TRACKS.length) { player.hidden = true; return; }
+      next();
     });
 
-    sound.addEventListener("click", () => {
-      if (music.paused) { music.play(); ico.setAttribute("d", ON); }
-      else { music.pause(); ico.setAttribute("d", OFF); }
+    $("toggle").addEventListener("click", () => { audio.paused ? play() : audio.pause(); });
+    $("next").addEventListener("click", next);
+    $("prev").addEventListener("click", prev);
+    $("vol").addEventListener("input", e => { audio.volume = e.target.value / 100; });
+
+    enter.addEventListener("click", () => {
+      enter.classList.add("gone");
+      video.play().catch(() => {});
+      started = true;
+      load(0);
+      play();
+      player.hidden = false;
     });
   </script>
 </body>
