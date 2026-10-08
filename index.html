@@ -107,7 +107,7 @@
     gap: 8px; color: var(--muted); font-size: .9rem; font-weight: 600;
   }
   .views svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  #views-n { color: var(--text); font-variant-numeric: tabular-nums; }
+  #views-n { color: var(--text); font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: .03em; }
 
   /* экран входа */
   #enter {
@@ -172,7 +172,6 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
       <span id="views-n">—</span>
     </div>
-    <img src="https://hits.sh/holyrichels.github.io.svg?style=flat&label=&color=00000000" alt="" width="1" height="1" style="position:absolute;opacity:0">
   </main>
 
   <script>
@@ -222,7 +221,7 @@
     setInterval(loadDiscord, 30000);
 
     // ===== видео, плеер и громкость =====
-    const TRACKS = ["music/music.mp3", "music/music2.mp3", "music/music3.mp3"]; // добавляй свои файлы сюда
+    const TRACKS = ["music/music.mp3", "music/music1.mp3", "music/music2.mp3", "music/music3.mp3", "music/music4.mp3"]; // добавляй свои файлы сюда
     const video = $("bgv"), enter = $("enter"), player = $("player");
     const audio = new Audio();
     audio.volume = 0.4;
@@ -266,11 +265,9 @@
     // ===== счётчик просмотров =====
     async function loadViews() {
       try {
-        const r = await fetch("https://hits.sh/holyrichels.github.io.json");
+        const r = await fetch("https://abacus.jasoncameron.dev/hit/holyrichels-github-io/views");
         const d = await r.json();
-        const n = d.total ?? d.hits ?? d.count;
-        if (n == null) throw new Error("no count");
-        $("views-n").textContent = Number(n).toLocaleString("ru-RU");
+        $("views-n").textContent = Number(d.value).toLocaleString("ru-RU");
       } catch (e) {
         $("views-n").textContent = "—";
       }
