@@ -192,7 +192,7 @@
     }
     typewrite($("bio"));
 
-    // ===== Discord =====
+    // ===== Discord (Lanyard) =====
     const DISCORD_ID = "652156100874993665";
     const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
 
@@ -224,12 +224,35 @@
     const TRACKS = ["music/music.mp3", "music/music1.mp3", "music/music2.mp3", "music/music3.mp3", "music/music4.mp3"]; // добавляй свои файлы сюда
     const video = $("bgv"), enter = $("enter"), player = $("player");
     const audio = new Audio();
-    audio.volume = 0.4;
+    audio.volume = 0.2;
     let idx = 0, started = false, failed = 0;
 
     const ICON_PLAY = "M8 5v14l11-7z";
     const ICON_PAUSE = "M6 5h4v14H6zM14 5h4v14h-4z";
     const setIcon = playing => $("ico").firstElementChild.setAttribute("d", playing ? ICON_PAUSE : ICON_PLAY);
+
+    let gainNode = null;
+    // Web Audio нужен только на iPhone/iPad, где audio.volume не работает.
+    // На компе и Android громкость идёт через audio.volume, как раньше.
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    function setupGain() {
+      if (!isIOS) return;
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const src = ctx.createMediaElementSource(audio);
+        gainNode = ctx.createGain();
+        gainNode.gain.value = 0.4;
+        src.connect(gainNode).connect(ctx.destination);
+        audio.volume = 1;
+        if (ctx.state === "suspended") ctx.resume();
+      } catch (e) { gainNode = null; }
+    }
+    function setVolume(v) {
+      if (gainNode) gainNode.gain.value = v; else audio.volume = v;
+    }
 
     function load(i) {
       idx = (i + TRACKS.length) % TRACKS.length;
@@ -243,6 +266,7 @@
     audio.addEventListener("pause", () => setIcon(false));
     audio.addEventListener("ended", next);
     audio.addEventListener("error", () => {
+      // файла нет: пробуем следующий, если ни один не нашёлся, прячем плеер
       if (++failed >= TRACKS.length) { player.hidden = true; return; }
       next();
     });
@@ -250,11 +274,12 @@
     $("toggle").addEventListener("click", () => { audio.paused ? play() : audio.pause(); });
     $("next").addEventListener("click", next);
     $("prev").addEventListener("click", prev);
-    $("vol").addEventListener("input", e => { audio.volume = e.target.value / 100; });
+    $("vol").addEventListener("input", e => setVolume(e.target.value / 100));
 
     enter.addEventListener("click", () => {
       enter.classList.add("gone");
       video.play().catch(() => {});
+      setupGain();
       started = true;
       load(0);
       play();
