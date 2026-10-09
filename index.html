@@ -99,7 +99,36 @@
   }
   .player button:hover { transform: scale(1.08); }
   .player svg { width: 16px; height: 16px; fill: currentColor; }
-  .player input[type=range] { flex: 1; min-width: 0; accent-color: #b8a2d6; cursor: pointer; }
+  .bar {
+    -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 4px; border-radius: 4px; outline: none; cursor: pointer;
+    background: linear-gradient(to right, #b8a2d6 var(--p, 40%), rgba(255, 255, 255, .15) var(--p, 40%));
+  }
+  .bar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--text);
+    box-shadow: 0 0 0 4px rgba(184, 162, 214, .25); transition: box-shadow .2s;
+  }
+  .bar:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(184, 162, 214, .35); }
+  .bar::-moz-range-thumb {
+    width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--text);
+    box-shadow: 0 0 0 4px rgba(184, 162, 214, .25);
+  }
+  .bar::-moz-range-track { background: transparent; }
+  .bar:focus-visible { box-shadow: 0 0 0 3px rgba(255, 255, 255, .4); }
+
+  /* телефон и планшет: громкость только кнопками устройства, ползунок скрыт */
+  @media (pointer: coarse) {
+    #vol { display: none; }
+    .player { justify-content: center; gap: 22px; }
+  }
+
+  .timeline {
+    margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 0 12px;
+    font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .timeline[hidden] { display: none; }
+  .timeline .bar { height: 4px; }
+  .timeline span { min-width: 34px; }
+  .timeline span:last-child { text-align: right; }
   .player-wrap { margin-top: 22px; }
 
   .views {
@@ -164,8 +193,14 @@
         <button id="next" type="button" aria-label="Следующий трек">
           <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
         </button>
-        <input id="vol" type="range" min="0" max="100" value="40" aria-label="Громкость">
+        <input id="vol" class="bar" type="range" min="0" max="100" value="40" aria-label="Громкость">
       </div>
+    </div>
+
+    <div class="timeline" id="timeline" hidden>
+      <span id="t-cur">0:00</span>
+      <input id="seek" class="bar" type="range" min="0" max="1000" value="0" aria-label="Перемотка">
+      <span id="t-dur">0:00</span>
     </div>
 
     <div class="views" title="Просмотры сайта">
@@ -193,7 +228,7 @@
     typewrite($("bio"));
 
     // ===== Discord (Lanyard) =====
-    const DISCORD_ID = "652156100874993665";
+    const DISCORD_ID = "652156100874993665"; // нужно быть на сервере https://discord.gg/lanyard
     const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
 
     async function loadDiscord() {
@@ -224,7 +259,7 @@
     const TRACKS = ["music/music.mp3", "music/music1.mp3", "music/music2.mp3", "music/music3.mp3", "music/music4.mp3"]; // добавляй свои файлы сюда
     const video = $("bgv"), enter = $("enter"), player = $("player");
     const audio = new Audio();
-    audio.volume = 0.2;
+    audio.volume = 0.4;
     let idx = 0, started = false, failed = 0;
 
     const ICON_PLAY = "M8 5v14l11-7z";
@@ -237,7 +272,7 @@
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
                   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     function setupGain() {
-      if (!isIOS) return;
+      if (!isIOS || matchMedia("(pointer: coarse)").matches) return;
       try {
         const Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return;
@@ -276,6 +311,29 @@
     $("prev").addEventListener("click", prev);
     $("vol").addEventListener("input", e => setVolume(e.target.value / 100));
 
+
+    // ===== таймлайн (можно выключить, поставив false) =====
+    const SHOW_TIMELINE = true;
+    const seek = $("seek"), tCur = $("t-cur"), tDur = $("t-dur"), timeline = $("timeline");
+    let seeking = false;
+    const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
+    const paint = el => el.style.setProperty("--p", (el.value / el.max * 100) + "%");
+
+    audio.addEventListener("timeupdate", () => {
+      if (!seeking && isFinite(audio.duration)) seek.value = audio.currentTime / audio.duration * 1000;
+      tCur.textContent = fmt(audio.currentTime);
+      tDur.textContent = fmt(audio.duration);
+      paint(seek);
+    });
+    seek.addEventListener("pointerdown", () => { seeking = true; });
+    seek.addEventListener("pointerup", () => { seeking = false; });
+    seek.addEventListener("input", () => {
+      if (isFinite(audio.duration)) audio.currentTime = seek.value / 1000 * audio.duration;
+      paint(seek);
+    });
+    $("vol").addEventListener("input", e => paint(e.target));
+    paint($("vol"));
+
     enter.addEventListener("click", () => {
       enter.classList.add("gone");
       video.play().catch(() => {});
@@ -284,6 +342,7 @@
       load(0);
       play();
       player.hidden = false;
+      timeline.hidden = !SHOW_TIMELINE;
     });
 
     // ===== счётчик просмотров =====
