@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>holyrichels</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<meta name="description" content="Личная страница">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* =========== НАСТРОЙКИ =========== */
+  :root {
+    --bg-image: url("bg.jpg");
+    --text: #e9e4f2;
+    --muted: #b3a9c6;
+    --card: rgba(30, 24, 40, .55);
+  }
+  /* ================================== */
+
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      var(--bg-image) center / cover no-repeat fixed,
+      linear-gradient(160deg, #8b6f86 0%, #6b5a86 38%, #3c4a85 75%, #2a2f5e 100%) fixed;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; background: rgba(15, 10, 25, .45); z-index: -1;
+  }
+  #bgv { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+
+  .card {
+    width: min(100%, 440px);
+    padding: 40px 28px 28px;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    animation: appear .9s ease both;
+  }
+  @keyframes appear { from { opacity: 0; transform: scale(.97); } }
+
+  .avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    object-fit: cover; display: block; margin: 0 auto 16px;
+    background: linear-gradient(135deg, #a58bb8, #5a6bb5);
+    border: 2px solid rgba(255, 255, 255, .15);
+  }
+  h1 { font-family: "Unbounded", "Manrope", sans-serif; font-size: 1.7rem; font-weight: 700; letter-spacing: .01em; }
+  .bio { margin-top: 6px; font-weight: 600; color: var(--muted); min-height: 1.5em; }
+  .bio.typing::after { content: "|"; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .loc {
+    margin-top: 14px; display: inline-flex; align-items: center; gap: 6px;
+    font-size: .85rem; color: var(--muted);
+  }
+
+  .discord {
+    margin: 24px auto 0; padding: 12px 16px; max-width: 340px;
+    display: flex; align-items: center; gap: 14px; text-align: left;
+    background: rgba(255, 255, 255, .06); border-radius: 16px;
+  }
+  .ava { position: relative; flex: none; width: 52px; height: 52px; }
+  .ava img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #5a6bb5; }
+  .dot {
+    position: absolute; right: -2px; bottom: -2px; width: 16px; height: 16px;
+    border-radius: 50%; background: #747f8d; border: 3px solid #2a2433;
+  }
+  .dot.online { background: #3ba55d; } .dot.idle { background: #faa61a; }
+  .dot.dnd { background: #ed4245; } .dot.offline { background: #747f8d; }
+  .info { min-width: 0; }
+  .info b { display: block; font-size: .95rem; }
+  .info span { display: block; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .links { margin-top: 26px; display: flex; justify-content: center; gap: 18px; }
+  .links a { color: var(--muted); transition: color .2s, transform .2s; display: grid; }
+  .links a:hover, .links a:focus-visible { color: #fff; transform: translateY(-2px); outline: none; }
+  .links svg { width: 30px; height: 30px; fill: currentColor; }
+
+  /* плеер */
+  .player {
+    margin: 22px auto 0; max-width: 340px; display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: rgba(255, 255, 255, .06); border-radius: 16px;
+  }
+  .player[hidden] { display: none; }
+  .player button {
+    flex: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .12); background: var(--card); color: var(--text);
+    display: grid; place-items: center; transition: transform .15s;
+  }
+  .player button:hover { transform: scale(1.08); }
+  .player svg { width: 16px; height: 16px; fill: currentColor; }
+  .bar {
+    -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 4px; border-radius: 4px; outline: none; cursor: pointer;
+    background: linear-gradient(to right, #b8a2d6 var(--p, 40%), rgba(255, 255, 255, .15) var(--p, 40%));
+  }
+  .bar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--text);
+    box-shadow: 0 0 0 4px rgba(184, 162, 214, .25); transition: box-shadow .2s;
+  }
+  .bar:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(184, 162, 214, .35); }
+  .bar::-moz-range-thumb {
+    width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--text);
+    box-shadow: 0 0 0 4px rgba(184, 162, 214, .25);
+  }
+  .bar::-moz-range-track { background: transparent; }
+  .bar:focus-visible { box-shadow: 0 0 0 3px rgba(255, 255, 255, .4); }
+
+  /* телефон и планшет: громкость только кнопками устройства, ползунок скрыт */
+  @media (pointer: coarse) {
+    #vol { display: none; }
+    .player { justify-content: center; gap: 22px; }
+  }
+
+  .timeline {
+    margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 0 12px;
+    font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .timeline[hidden] { display: none; }
+  .timeline .bar { height: 4px; }
+  .timeline span { min-width: 34px; }
+  .timeline span:last-child { text-align: right; }
+  .player-wrap { margin-top: 22px; }
+
+  .views {
+    margin-top: 18px; display: flex; align-items: center; justify-content: center;
+    gap: 8px; color: var(--muted); font-size: .9rem; font-weight: 600;
+  }
+  .views svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #views-n { color: var(--text); font-variant-numeric: tabular-nums; font-size: 1rem; letter-spacing: .03em; }
+
+  /* экран входа */
+  #enter {
+    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+    background: rgba(15, 10, 25, .7); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    color: var(--text); font: 600 1.1rem "Manrope", sans-serif; border: 0; cursor: pointer;
+    transition: opacity .6s;
+  }
+  #enter.gone { opacity: 0; pointer-events: none; }
+
+  /* курсор-искры */
+  .fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+  /* кнопка игры */
+  .game-btn {
+    margin-top: 18px; padding: 8px 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .12); background: var(--card); color: var(--text);
+    font: 600 .85rem "Manrope", sans-serif; transition: transform .15s;
+  }
+  .game-btn:hover { transform: scale(1.05); }
+
+  /* мини-игра «Поймай лепестки» */
+  .game { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+    background: rgba(15, 10, 25, .7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .game[hidden] { display: none; }
+  .game-box {
+    position: relative; width: min(92vw, 400px); height: min(70vh, 440px);
+    display: flex; flex-direction: column; padding: 14px; overflow: hidden;
+    background: var(--card); border: 1px solid rgba(255, 255, 255, .08); border-radius: 24px;
+  }
+  .game-top { display: flex; justify-content: space-between; align-items: center; font-size: .9rem; color: var(--muted); }
+  .game-top b { color: var(--text); }
+  #g-close { background: none; border: 0; color: var(--muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; }
+  .arena { position: relative; flex: 1; margin: 10px 0; overflow: hidden; border-radius: 16px; background: rgba(255, 255, 255, .04); }
+  .petal { position: absolute; top: 0; font-size: 28px; cursor: pointer; user-select: none; }
+  .game-msg { text-align: center; font-size: .85rem; color: var(--muted); min-height: 1.2em; margin-bottom: 8px; }
+  #g-start { margin-top: 0; align-self: center; }
+
+  a:focus-visible, button:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; } .links a, .player button { transition: none; }
+    .bio.typing::after { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <video id="bgv" src="bg.mp4" poster="bg.jpg" autoplay muted loop playsinline preload="auto"></video>
+  <button id="enter" type="button">Нажми, чтобы войти</button>
+  <canvas id="fx" class="fx" aria-hidden="true"></canvas>
+
+  <main class="card">
+    <img class="avatar" src="avatar.jpg" alt="" onerror="this.removeAttribute('src')">
+
+    <h1>holyrichels</h1>
+    <p class="bio" id="bio" data-text="В тишине слышен самый громкий голос"></p>
+    <p class="loc">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+      Moscow, Russia
+    </p>
+
+    <div class="discord" id="discord">
+      <div class="ava"><img id="d-ava" alt=""><span class="dot offline" id="d-dot"></span></div>
+      <div class="info"><b id="d-name">Discord</b><span id="d-text">Загружаю профиль…</span></div>
+    </div>
+
+    <nav class="links" aria-label="Мои ссылки">
+      <a href="https://github.com/holyrichels" aria-label="GitHub" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+      <a href="https://steamcommunity.com/id/holyrichels" aria-label="Steam" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><g fill="none" stroke="#2a2433" stroke-linecap="round"><circle cx="15.2" cy="9.3" r="3.7" stroke-width="2.2"/><path d="M8.6 15.6l4.2-4" stroke-width="2.4"/></g><circle cx="8.2" cy="15.8" r="2.6" fill="#2a2433"/><circle cx="8.2" cy="15.8" r="1" fill="currentColor"/></svg>
+      </a>
+    </nav>
+
+    <div class="player-wrap">
+      <div class="player" id="player" hidden>
+        <button id="prev" type="button" aria-label="Предыдущий трек">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12 18 6v12z"/></svg>
+        </button>
+        <button id="toggle" type="button" aria-label="Пауза или воспроизведение">
+          <svg id="ico" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button id="next" type="button" aria-label="Следующий трек">
+          <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+        </button>
+        <input id="vol" class="bar" type="range" min="0" max="100" value="40" aria-label="Громкость">
+      </div>
+    </div>
+
+    <div class="timeline" id="timeline" hidden>
+      <span id="t-cur">0:00</span>
+      <input id="seek" class="bar" type="range" min="0" max="1000" value="0" aria-label="Перемотка">
+      <span id="t-dur">0:00</span>
+    </div>
+
+    <div class="views" title="Просмотры сайта">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="views-n">—</span>
+    </div>
+    <button class="game-btn" id="game-btn" type="button">🌸 Пока цветёт тишина</button>
+  </main>
+
+  <div id="game" class="game" hidden>
+    <div class="game-box">
+      <div class="game-top">
+        <span>Время: <b id="g-time">30</b></span>
+        <span>Очки: <b id="g-score">0</b></span>
+        <button id="g-close" type="button" aria-label="Закрыть">✕</button>
+      </div>
+      <div id="arena" class="arena"></div>
+      <p class="game-msg" id="g-msg">Ловите лепестки, пока не кончилось время</p>
+      <button id="g-start" class="game-btn" type="button">Старт</button>
+    </div>
+  </div>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // ===== печатная машинка =====
+    function typewrite(el) {
+      const text = el.dataset.text;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = text; return; }
+      el.textContent = "";
+      el.classList.add("typing");
+      let i = 0;
+      (function step() {
+        el.textContent = text.slice(0, ++i);
+        if (i < text.length) setTimeout(step, 55);
+        else setTimeout(() => el.classList.remove("typing"), 1200);
+      })();
+    }
+    typewrite($("bio"));
+
+    // ===== Discord (Lanyard) =====
+    const DISCORD_ID = "652156100874993665"; // нужно быть на сервере https://discord.gg/lanyard
+    const labels = { online: "В сети", idle: "Неактивен", dnd: "Не беспокоить", offline: "Не в сети" };
+
+    async function loadDiscord() {
+      try {
+        const r = await fetch("https://api.lanyard.rest/v1/users/" + DISCORD_ID);
+        const { success, data } = await r.json();
+        if (!success) throw new Error("not found");
+        const u = data.discord_user;
+        $("d-name").textContent = u.global_name || u.username;
+        if (u.avatar) $("d-ava").src = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128`;
+        $("d-dot").className = "dot " + data.discord_status;
+
+        const custom = data.activities.find(a => a.type === 4);
+        const game = data.activities.find(a => a.type !== 4);
+        let text = labels[data.discord_status];
+        if (data.listening_to_spotify && data.spotify) text = `Слушает: ${data.spotify.artist} — ${data.spotify.song}`;
+        else if (game) text = `Играет в ${game.name}`;
+        else if (custom && custom.state) text = custom.state;
+        $("d-text").textContent = text;
+      } catch (e) {
+        $("d-text").textContent = "Профиль не подключён";
+      }
+    }
+    loadDiscord();
+    setInterval(loadDiscord, 30000);
+
+    // ===== видео, плеер и громкость =====
+    const TRACKS = ["music/music.mp3", "music/music1.mp3", "music/music2.mp3", "music/music5.mp3", "music/music3.mp3", "music/music4.mp3"]; // добавляй свои файлы сюда
+    const video = $("bgv"), enter = $("enter"), player = $("player");
+    const audio = new Audio();
+    audio.volume = 0.4;
+    let idx = 0, started = false, failed = 0;
+
+    const ICON_PLAY = "M8 5v14l11-7z";
+    const ICON_PAUSE = "M6 5h4v14H6zM14 5h4v14h-4z";
+    const setIcon = playing => $("ico").firstElementChild.setAttribute("d", playing ? ICON_PAUSE : ICON_PLAY);
+
+    let gainNode = null;
+    // Web Audio нужен только на iPhone/iPad, где audio.volume не работает.
+    // На компе и Android громкость идёт через audio.volume, как раньше.
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    function setupGain() {
+      if (!isIOS || matchMedia("(pointer: coarse)").matches) return;
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const src = ctx.createMediaElementSource(audio);
+        gainNode = ctx.createGain();
+        gainNode.gain.value = 0.4;
+        src.connect(gainNode).connect(ctx.destination);
+        audio.volume = 1;
+        if (ctx.state === "suspended") ctx.resume();
+      } catch (e) { gainNode = null; }
+    }
+    function setVolume(v) {
+      if (gainNode) gainNode.gain.value = v; else audio.volume = v;
+    }
+
+    function load(i) {
+      idx = (i + TRACKS.length) % TRACKS.length;
+      audio.src = TRACKS[idx];
+    }
+    function play() { audio.play().catch(() => {}); }
+    function next() { load(idx + 1); if (started) play(); }
+    function prev() { load(idx - 1); if (started) play(); }
+
+    audio.addEventListener("playing", () => { failed = 0; setIcon(true); });
+    audio.addEventListener("pause", () => setIcon(false));
+    audio.addEventListener("ended", next);
+    audio.addEventListener("error", () => {
+      // файла нет: пробуем следующий, если ни один не нашёлся, прячем плеер
+      if (++failed >= TRACKS.length) { player.hidden = true; return; }
+      next();
+    });
+
+    $("toggle").addEventListener("click", () => { audio.paused ? play() : audio.pause(); });
+    $("next").addEventListener("click", next);
+    $("prev").addEventListener("click", prev);
+    $("vol").addEventListener("input", e => setVolume(e.target.value / 100));
+
+
+    // ===== таймлайн (можно выключить, поставив false) =====
+    const SHOW_TIMELINE = true;
+    const seek = $("seek"), tCur = $("t-cur"), tDur = $("t-dur"), timeline = $("timeline");
+    let seeking = false;
+    const fmt = t => isFinite(t) ? `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}` : "0:00";
+    const paint = el => el.style.setProperty("--p", (el.value / el.max * 100) + "%");
+
+    audio.addEventListener("timeupdate", () => {
+      if (!seeking && isFinite(audio.duration)) seek.value = audio.currentTime / audio.duration * 1000;
+      tCur.textContent = fmt(audio.currentTime);
+      tDur.textContent = fmt(audio.duration);
+      paint(seek);
+    });
+    seek.addEventListener("pointerdown", () => { seeking = true; });
+    seek.addEventListener("pointerup", () => { seeking = false; });
+    seek.addEventListener("input", () => {
+      if (isFinite(audio.duration)) audio.currentTime = seek.value / 1000 * audio.duration;
+      paint(seek);
+    });
+    $("vol").addEventListener("input", e => paint(e.target));
+    // колесико мыши над всем плеером (кнопки и ползунок): громкость, шаг 5%
+    $("player").addEventListener("wheel", e => {
+      e.preventDefault();
+      const vol = $("vol");
+      vol.value = Math.min(100, Math.max(0, +vol.value + (e.deltaY < 0 ? 5 : -5)));
+      vol.dispatchEvent(new Event("input"));
+    }, { passive: false });
+
+    paint($("vol"));
+
+    // ===== курсор-искры (только мышь, не на телефоне и не при «уменьшении движения») =====
+    const fx = $("fx"), fc = fx.getContext("2d");
+    const resizeFx = () => { fx.width = innerWidth; fx.height = innerHeight; };
+    resizeFx(); addEventListener("resize", resizeFx);
+    const SPARK_COLORS = ["#b8a2d6", "#f5b7d2", "#e9e4f2"];
+    let sparks = [], sparkRaf = null;
+    addEventListener("pointermove", e => {
+      if (e.pointerType !== "mouse" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      for (let i = 0; i < 2; i++) sparks.push({
+        x: e.clientX, y: e.clientY,
+        vx: (Math.random() - .5) * 1.6, vy: (Math.random() - .5) * 1.6 - .4,
+        life: 1, c: SPARK_COLORS[(Math.random() * 3) | 0]
+      });
+      if (!sparkRaf) sparkRaf = requestAnimationFrame(tickSparks);
+    });
+    function tickSparks() {
+      fc.clearRect(0, 0, fx.width, fx.height);
+      sparks = sparks.filter(p => p.life > 0);
+      for (const p of sparks) {
+        p.x += p.vx; p.y += p.vy; p.vy += .02; p.life -= .03;
+        fc.globalAlpha = Math.max(p.life, 0);
+        fc.fillStyle = p.c;
+        fc.beginPath(); fc.arc(p.x, p.y, 2.2 * p.life + .8, 0, Math.PI * 2); fc.fill();
+      }
+      fc.globalAlpha = 1;
+      sparkRaf = sparks.length ? requestAnimationFrame(tickSparks) : null;
+    }
+
+    // ===== мини-игра «Пока цветёт тишина» =====
+    const game = $("game"), arena = $("arena");
+    let gSpawn = null, gTimer = null, gLeft = 30, score = 0, running = false;
+
+    function stopGame() { clearInterval(gSpawn); clearInterval(gTimer); running = false; }
+    function openGame() {
+      stopGame();
+      arena.innerHTML = "";
+      score = 0; gLeft = 30;
+      $("g-score").textContent = 0; $("g-time").textContent = 30;
+      $("g-msg").textContent = `Лучший результат: ${localStorage.getItem("petal-best") || 0}`;
+      $("g-start").hidden = false; $("g-start").textContent = "Старт";
+      game.hidden = false;
+    }
+    function closeGame() { stopGame(); game.hidden = true; }
+
+    function spawnPetal() {
+      const p = document.createElement("span");
+      p.className = "petal";
+      p.textContent = Math.random() < .5 ? "🌸" : "🌼";
+      p.style.left = (Math.random() * 85) + "%";
+      arena.appendChild(p);
+      const anim = p.animate(
+        [{ transform: "translateY(-40px)" }, { transform: `translateY(${arena.clientHeight + 40}px)` }],
+        { duration: 2600 + Math.random() * 1800, easing: "linear" }
+      );
+      anim.onfinish = () => p.remove();
+      p.addEventListener("pointerdown", () => {
+        if (!running) return;
+        score++; $("g-score").textContent = score;
+        p.remove();
+      });
+    }
+
+    function startGame() {
+      stopGame();
+      arena.innerHTML = "";
+      running = true; score = 0; gLeft = 30;
+      $("g-score").textContent = 0; $("g-time").textContent = 30;
+      $("g-msg").textContent = "Ловите лепестки!";
+      $("g-start").hidden = true;
+      gSpawn = setInterval(spawnPetal, 450);
+      gTimer = setInterval(() => {
+        gLeft--; $("g-time").textContent = gLeft;
+        if (gLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame() {
+      stopGame();
+      const best = Math.max(score, +(localStorage.getItem("petal-best") || 0));
+      localStorage.setItem("petal-best", best);
+      $("g-msg").textContent = `Итог: ${score}. Лучший: ${best}`;
+      $("g-start").hidden = false; $("g-start").textContent = "Ещё раз";
+    }
+
+    $("game-btn").addEventListener("click", openGame);
+    $("g-close").addEventListener("click", closeGame);
+    $("g-start").addEventListener("click", startGame);
+    addEventListener("keydown", e => { if (e.key === "Escape" && !game.hidden) closeGame(); });
+
+    // ===== пробел = пауза/воспроизведение (на компе) =====
+    document.addEventListener("keydown", e => {
+      if (e.code !== "Space" || !started || e.repeat || !$("game").hidden) return;
+      // если фокус на кнопке, ползунке или ссылке, пробел и так работает по-своему
+      if (e.target.closest("button, input, a, textarea")) return;
+      e.preventDefault();
+      audio.paused ? play() : audio.pause();
+    });
+
+    enter.addEventListener("click", () => {
+      if (started) return;           // повторный вызов (например, пробелом) не перезапускает трек
+      enter.blur();                  // убираем фокус, чтобы пробел не нажимал «Войти» снова
+      enter.classList.add("gone");
+      video.play().catch(() => {});
+      setupGain();
+      started = true;
+      load(0);
+      play();
+      player.hidden = false;
+      timeline.hidden = !SHOW_TIMELINE;
+    });
+
+    // ===== счётчик просмотров =====
+    async function loadViews() {
+      try {
+        const r = await fetch("https://abacus.jasoncameron.dev/hit/holyrichels-github-io/views");
+        const d = await r.json();
+        $("views-n").textContent = Number(d.value).toLocaleString("ru-RU");
+      } catch (e) {
+        $("views-n").textContent = "—";
+      }
+    }
+    loadViews();
+  </script>
+</body>
+</html>
